@@ -18,9 +18,10 @@ const App = {
             // Initialize storage first
             await Storage.init();
 
-            // Check if first run - show welcome modal
+            // Check if first run - load Emily's wardrobe data automatically
             if (Storage.isFirstRun()) {
-                this.showWelcomeModal();
+                await this.loadDefaultData();
+                this.loadTheme();
             } else {
                 // Load theme
                 this.loadTheme();
@@ -681,6 +682,34 @@ const App = {
         this.requestLocation();
 
         UI.showToast(`Welcome, ${name}! Let's build your wardrobe.`);
+    },
+
+    // ============ LOAD DEFAULT DATA (Emily's Wardrobe) ============
+
+    async loadDefaultData() {
+        try {
+            console.log('Loading Emily\'s wardrobe data...');
+            const response = await fetch('data/emily-wardrobe-backup.json');
+
+            if (!response.ok) {
+                throw new Error('Could not load default data');
+            }
+
+            const data = await response.json();
+            await Storage.importAllData(data);
+
+            Storage.setSetting('userName', 'Emily');
+            Storage.setSetting('location', { lat: 33.2148, lon: -97.1331, name: 'Denton, Texas' });
+            Storage.setMigrated();
+
+            console.log('Emily\'s wardrobe loaded successfully!');
+            UI.showToast('Welcome Emily! Your wardrobe is ready.');
+
+        } catch (err) {
+            console.error('Failed to load default data:', err);
+            // If loading fails, just show welcome modal for manual setup
+            this.showWelcomeModal();
+        }
     },
 
     // ============ DATA EXPORT/IMPORT ============
