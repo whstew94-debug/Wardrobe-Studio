@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Wardrobe Studio - Your personal wardrobe and outfit planning companion">
+    <meta name="theme-color" content="#6b5b4a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Wardrobe Studio">
+
+    <title>Wardrobe Studio</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <div class="header-left">
+                    <p class="greeting" id="greeting">Hello, Emily! ✨</p>
+                    <h1>Wardrobe Studio</h1>
+                    <p class="subtitle">Your personal style companion</p>
+                </div>
+                <div class="header-right">
+                    <div class="weather-widget" id="weatherWidget" onclick="App.refreshWeather()">
+                        <div class="weather-loading">
+                            <span>🌡️</span>
+                            <span>Loading weather...</span>
+                        </div>
+                    </div>
+                    <div class="weather-suggestion" id="weatherSuggestion" style="display: none;"></div>
+                    <div class="header-controls">
+                        <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+                        <button class="settings-btn" onclick="App.openSettings()" title="Settings">⚙️</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('wardrobe')">My Wardrobe</button>
+            <button class="tab-btn" onclick="showTab('weekly')">Weekly Planner</button>
+            <button class="tab-btn" onclick="showTab('builder')">Mix & Match</button>
+            <button class="tab-btn" onclick="showTab('shopping')">Shopping List</button>
+        </div>
+
+        <!-- Wardrobe Tab -->
+        <div id="wardrobe" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🍂 Your Color Palette</h2>
+                </div>
+                <div class="color-palette">
+                    <div class="color-swatch" style="background: #6b5b4a;">Taupe</div>
+                    <div class="color-swatch" style="background: #8b7355;">Brown</div>
+                    <div class="color-swatch" style="background: #000000;">Black</div>
+                    <div class="color-swatch" style="background: #f5f5dc; color: #6b5b4a;">Cream</div>
+                    <div class="color-swatch" style="background: #b85c38;">Rust</div>
+                    <div class="color-swatch" style="background: #4a5f4f;">Forest</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <!-- Tops Section -->
+                <div class="wardrobe-section">
+                    <div class="section-header" data-category="tops">
+                        <h3 class="section-title">Tops & Blouses</h3>
+                    </div>
+                    <div class="wardrobe-grid" id="tops-grid"></div>
+                </div>
+
+                <!-- Bottoms Section -->
+                <div class="wardrobe-section">
+                    <div class="section-header" data-category="bottoms">
+                        <h3 class="section-title">Bottoms</h3>
+                    </div>
+                    <div class="wardrobe-grid" id="bottoms-grid"></div>
+                </div>
+
+                <!-- Outerwear Section -->
+                <div class="wardrobe-section">
+                    <div class="section-header" data-category="outerwear">
+                        <h3 class="section-title">Outerwear</h3>
+                    </div>
+                    <div class="wardrobe-grid" id="outerwear-grid"></div>
+                </div>
+
+                <!-- Other Section -->
+                <div class="wardrobe-section">
+                    <div class="section-header" data-category="other">
+                        <h3 class="section-title">Dresses & Shoes</h3>
+                    </div>
+                    <div class="wardrobe-grid" id="other-grid"></div>
+                </div>
+
+                <!-- Custom Sections Container -->
+                <div id="custom-sections"></div>
+
+                <!-- Favorites Section -->
+                <div class="wardrobe-section">
+                    <div class="section-header" data-category="favorites">
+                        <h3 class="section-title">⭐ Favorites</h3>
+                    </div>
+                    <div class="wardrobe-grid" id="favorites-grid"></div>
+                </div>
+
+                <!-- Laundry Section -->
+                <div class="wardrobe-section">
+                    <div class="section-header" data-category="laundry">
+                        <h3 class="section-title">🧺 In Laundry</h3>
+                    </div>
+                    <div class="wardrobe-grid" id="laundry-grid"></div>
+                </div>
+
+                <!-- Trash Section -->
+                <div class="wardrobe-section">
+                    <div class="section-header">
+                        <h3 class="section-title">🗑️ Trash</h3>
+                        <button class="btn btn-danger btn-sm" onclick="App.emptyTrash()" id="empty-trash-btn" style="display:none;">
+                            Empty Trash
+                        </button>
+                    </div>
+                    <div class="wardrobe-grid" id="trash-grid"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="App.openUploadModal()">
+                        📸 Upload New Items
+                    </button>
+                    <button class="btn btn-secondary" onclick="App.openAddSectionModal()">
+                        ➕ Add Section
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Planner Tab -->
+        <div id="weekly" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📅 Weekly Outfit Planner</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9em;">Drag items to customize • Click "+ Add" to browse wardrobe</p>
+                </div>
+                <div id="weekly-outfits"></div>
+            </div>
+        </div>
+
+        <!-- Mix & Match Builder Tab -->
+        <div id="builder" class="tab-content">
+            <div class="builder-layout">
+                <div class="palette-sidebar">
+                    <div class="palette-header">
+                        <h3 class="palette-title">Your Items</h3>
+                        <button class="btn btn-icon btn-primary" onclick="document.getElementById('builder-upload').click()" title="Upload new item">
+                            📸
+                        </button>
+                    </div>
+                    <input type="file" id="builder-upload" accept="image/*" multiple style="display:none">
+                    <div class="wardrobe-grid" id="builder-palette"></div>
+                </div>
+                <div class="builder-canvas">
+                    <div class="canvas-header">
+                        <h3 class="canvas-title">Build Your Outfit</h3>
+                        <div class="canvas-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="App.clearBuilder()">Clear</button>
+                            <button class="btn btn-primary btn-sm" onclick="App.saveBuilderOutfit()">💾 Save</button>
+                        </div>
+                    </div>
+                    <div class="outfit-canvas" id="builder-canvas">
+                        <p class="outfit-canvas-empty">Click + on items to add them to your outfit</p>
+                    </div>
+                    <div class="outfit-notes">
+                        <label class="form-label">Outfit Notes (optional)</label>
+                        <textarea class="notes-input" id="builder-notes" placeholder="Add notes about this outfit..."></textarea>
+                    </div>
+                    <div class="saved-section" id="saved-outfits-section" style="display:none">
+                        <h3 class="saved-title">💾 Saved Outfits</h3>
+                        <div class="saved-grid" id="saved-outfits-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shopping List Tab -->
+        <div id="shopping" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🛍️ Shopping List</h2>
+                    <button class="btn btn-primary btn-sm" onclick="App.openShoppingModal()">➕ Add Item</button>
+                </div>
+                <div class="shopping-grid" id="shopping-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Weekly Add Modal -->
+    <div class="modal" id="weekly-add-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Add Item to Outfit</h3>
+            <div class="wardrobe-grid weekly-add-grid" id="weekly-add-grid"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="App.closeWeeklyModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping Modal -->
+    <div class="modal" id="shopping-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Add Shopping Item</h3>
+            <div class="form-group">
+                <label class="form-label">Item Name *</label>
+                <input type="text" class="form-input" id="shop-name" placeholder="e.g., Brown Leather Boots">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Why You Need It</label>
+                <textarea class="form-input form-textarea" id="shop-desc" placeholder="e.g., Goes with 80% of my wardrobe"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Estimated Price</label>
+                <input type="text" class="form-input" id="shop-price" placeholder="e.g., $100">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Photo (Optional)</label>
+                <div class="file-upload" onclick="document.getElementById('shop-photo').click()">
+                    <div class="file-upload-icon">📸</div>
+                    <p class="file-upload-text">Click to upload photo</p>
+                    <input type="file" id="shop-photo" accept="image/*">
+                    <img id="shop-preview" class="preview-image" style="display:none">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="App.closeShoppingModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="App.addShoppingItem()">Add to List</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Item Modal -->
+    <div class="modal" id="move-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Move Item</h3>
+            <div class="form-group">
+                <label class="form-label">Move to Section</label>
+                <select class="form-input" id="move-category">
+                    <option value="tops">Tops & Blouses</option>
+                    <option value="bottoms">Bottoms</option>
+                    <option value="outerwear">Outerwear</option>
+                    <option value="other">Dresses & Shoes</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="App.closeMoveModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="App.moveItemToCategory()">Move Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Section Modal -->
+    <div class="modal" id="add-section-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Add New Section</h3>
+            <div class="form-group">
+                <label class="form-label">Section Name *</label>
+                <input type="text" class="form-input" id="new-section-name" placeholder="e.g., Accessories, Jewelry, Bags">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="App.closeAddSectionModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="App.createNewSection()">Create Section</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="upload-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Upload New Items</h3>
+            <div class="form-group">
+                <label class="form-label">Select Category *</label>
+                <select class="form-input" id="upload-category">
+                    <option value="tops">Tops & Blouses</option>
+                    <option value="bottoms">Bottoms</option>
+                    <option value="outerwear">Outerwear</option>
+                    <option value="other">Dresses & Shoes</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Photos</label>
+                <div class="file-upload" onclick="document.getElementById('wardrobe-upload').click()">
+                    <div class="file-upload-icon">📸</div>
+                    <p class="file-upload-text">Click to select photos</p>
+                    <input type="file" id="wardrobe-upload" accept="image/*" multiple>
+                    <div id="upload-preview-container" class="upload-preview-container"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="App.closeUploadModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="App.processUpload()">Add to Wardrobe</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">⚙️ Settings</h3>
+
+            <div class="settings-section">
+                <label class="settings-label">Your Name</label>
+                <input type="text" id="settings-name" class="form-input" placeholder="Enter your name" maxlength="50">
+                <p class="settings-hint">This appears in your greeting</p>
+            </div>
+
+            <div class="settings-section">
+                <label class="settings-label">Location</label>
+                <div class="settings-row">
+                    <input type="text" id="settings-location" class="form-input" placeholder="City name" readonly>
+                    <button class="btn btn-secondary" onclick="App.detectLocation()">📍 Detect</button>
+                </div>
+                <p class="settings-hint">Used for weather forecasts</p>
+            </div>
+
+            <div class="settings-section">
+                <label class="settings-label">Temperature Unit</label>
+                <select id="settings-temp-unit" class="form-input">
+                    <option value="fahrenheit">Fahrenheit (°F)</option>
+                    <option value="celsius">Celsius (°C)</option>
+                </select>
+            </div>
+
+            <div class="settings-section">
+                <label class="settings-label">Data Management</label>
+                <div class="settings-buttons">
+                    <button class="btn btn-secondary" onclick="App.exportData()">📤 Export Backup</button>
+                    <button class="btn btn-secondary" onclick="App.importData()">📥 Import Backup</button>
+                </div>
+                <p class="settings-hint">Backup your wardrobe data to a file</p>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="App.closeSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="App.saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Modal (First Run) -->
+    <div class="modal welcome-modal" id="welcome-modal">
+        <div class="modal-content">
+            <div class="welcome-icon">👗</div>
+            <h2 class="welcome-title">Welcome to Wardrobe Studio!</h2>
+            <p class="welcome-subtitle">Your personal wardrobe and outfit planning companion. Let's get started by setting up your profile.</p>
+
+            <div class="form-group">
+                <label class="form-label">What should we call you?</label>
+                <input type="text" id="welcome-name" class="form-input welcome-input" placeholder="Your name" value="Emily" maxlength="50">
+            </div>
+
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="btn btn-primary" onclick="App.completeWelcome()" style="padding: 14px 40px; font-size: 1.1em;">
+                    Get Started ✨
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="js/storage.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/dragdrop.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
